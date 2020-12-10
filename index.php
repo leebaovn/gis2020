@@ -57,12 +57,6 @@
         }
       });
 
-      // <?php
-//   include_once('./db.php');
-//   $addVehicle = add_new_vehicle('01542','#F00');
-//   echo $addVehicle;
-echo 'alert("hello")';
-// ?>
 
       function addGraphic(type, point) {
         var graphic = new Graphic({
@@ -88,7 +82,6 @@ echo 'alert("hello")';
         routeTask.solve(routeParams).then(function (data) {
           // Display the route
           data.routeResults.forEach(function (result) {
-            console.log(result,'zzzzzzz');
           document.getElementById("distance").value = result.route.attributes.Total_Kilometers;
           document.getElementById("estimate-time").value = result.route.attributes.Total_TravelTime;
 
