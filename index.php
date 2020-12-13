@@ -25,8 +25,10 @@
       "esri/tasks/RouteTask",
       "esri/tasks/support/RouteParameters",
       "esri/tasks/support/FeatureSet",
-      "esri/Graphic"
-    ], function (Map, MapView, RouteTask, RouteParameters, FeatureSet, Graphic) {
+      "esri/Graphic",
+      "esri/widgets/Slider",
+      "esri/tasks/support/MultipartColorRamp",
+    ], function (Map, MapView, RouteTask, RouteParameters, FeatureSet, Graphic, Slider, MultipartColorRamp) {
 
       var map = new Map({
         basemap: "topo-vector"
@@ -41,6 +43,26 @@
       var routeTask = new RouteTask({
         url: "https://utility.arcgis.com/usrsvcs/appservices/gnSXcBKOBpfoK98l/rest/services/World/Route/NAServer/Route_World/solve"
       });
+
+      // const xmlHttp = new XMLHttpRequest();
+      // xmlHttp.onreadystatechange = function() {
+      //   if (this.readyState == 4 && this.status == 200) {
+      //     // document.getElementById("demo").innerHTML = this.responseText;
+      //     console.log(this.responseText);
+      //   }
+      // };
+      // xmlHttp.open('POST', 'db.php', true);
+      // xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      // // xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
+      // // xmlHttp.send("function=node");
+      // let nodeList = "";
+      // [1, 2, 3, 4, 5, 6].forEach(i => {
+      //   nodeList += "&list[]=" + i;
+      // });
+      // xmlHttp.send("function=add_new_arc" + nodeList);
+
+      
+      
 
       view.on("click", function (event) {
         if (view.graphics.length === 0) {
@@ -82,8 +104,8 @@
         routeTask.solve(routeParams).then(function (data) {
           // Display the route
           data.routeResults.forEach(function (result) {
-          document.getElementById("distance").value = result.route.attributes.Total_Kilometers;
-          document.getElementById("estimate-time").value = result.route.attributes.Total_TravelTime;
+          document.getElementById("distance").value = result.route.attributes.Total_Kilometers.toFixed(2);
+          document.getElementById("estimate-time").value = result.route.attributes.Total_TravelTime.toFixed(4);
 
             result.route.symbol = {
               type: "simple-line",
@@ -93,7 +115,36 @@
             view.graphics.add(result.route);
           });
         });
+
       }
+
+      const slider = new Slider({
+        container: "sliderDiv",
+        min: 0,
+        max: 10,
+        values: [ 10 ],
+        snapOnClickEnabled: false,
+        visibleElements: {
+          labels: true,
+          rangeLabels: true
+        },
+      });
+
+      slider.tickConfigs = [{
+        mode: "count",
+        values: 11,
+        labelsVisible: true,
+        tickCreatedFunction: function(initialValue, tickElement, labelElement) {
+          labelElement.innerHTML = 't' + labelElement["data-value"];
+          // tickElement.classList.add("largeTicks");
+          // labelElement.classList.add("largeLabels");
+          labelElement.onclick = function() {
+            const newValue = labelElement["data-value"];
+            slider.values = [ newValue ];
+          };
+        }
+      }];
+      view.ui.add(slider);
     });
   </script>
 </head>
@@ -111,15 +162,16 @@
       <input type="text" id='destination'>
     </div>
     <div class='header__info'>
-      <label>Khoảng cách(km)</label>
+      <label>Khoảng cách (km)</label>
       <input type="text" id='distance'>
     </div>
     <div class='header__info'>
-      <label>Ước lượng thời gian(phút)</label>
+      <label>Ước lượng thời gian (phút)</label>
       <input type="text" id='estimate-time'>
     </div>
   </div>
   <div id="viewDiv"></div>
+  <div id="sliderDiv" class="footer"></div>
 </div>
 </body>
 
