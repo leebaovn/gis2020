@@ -5,18 +5,7 @@ session_start();
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>ArcGIS API for JavaScript Tutorials: Create a Starter App</title>
-  <style>
-    html,
-    body,
-    #viewDiv {
-      padding: 0;
-      margin: 0;
-      height: 100%;
-      width: 100%;
-    }
-  </style>
-
+  <title>Deviation detection</title>
   <link rel="stylesheet" href="https://js.arcgis.com/4.17/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.17/"></script>
   <link rel="stylesheet" href="./style.css">
@@ -36,7 +25,7 @@ session_start();
           symbol: {
             type: "simple-marker",
             color: "gray",
-            size: "8px"
+            size: "4px"
           },
           geometry: point
         });
@@ -44,9 +33,6 @@ session_start();
       }
 
       function drawLine(paths) {
-        // drawPoint(x);
-        // drawPoint(y);
-        console.log('imhere')
         var polyline = {
           type: "polyline",  
             paths: paths
@@ -55,7 +41,7 @@ session_start();
         var polylineSymbol = {
           type: "simple-line",
           color: 'black',
-          width: 4
+          width: 1
         };
 
         var polylineGraphic = new Graphic({
@@ -97,46 +83,48 @@ session_start();
       // });
       // xmlHttp.send("function=add_new_arc" + nodeList);
 
-      let isSelectRoute = false;
       let paths = []
-      let ok = false;
+      let starter = []
+      let isOk = false;
       view.on("click", function (event) {
         const {longitude,latitude} = event.mapPoint;
+        if(view.graphics.length<2){
+          starter.push([longitude,latitude])
+        }
         if (view.graphics.length === 0) {
-          addGraphic("start", event.mapPoint);
+          addPoint("start", event.mapPoint);
           document.getElementById("start").value = `${longitude},${latitude}`;
         } else if (view.graphics.length === 1) {
-          addGraphic("finish", event.mapPoint);
+          addPoint("finish", event.mapPoint);
           document.getElementById("destination").value = `${longitude},${latitude}`;
-          isSelectRoute = true;
           document.getElementById("status").innerHTML = 'Hãy chọn lộ trình di chuyển của bạn';
+
+          //Inser db 
           getRoute();
         } else{
+          //Bắt đầu cho ghi nhận lộ trình di chuyển của user
           if(view.graphics.length > 6) {
-            if(!ok){
+            if(!isOk){
               drawLine(paths)
-              ok = true;
+              isOk = true;
               const {length} = paths;
                const slider = new Slider({
                 container: "sliderDiv",
                 min: 0,
                 max: length,
                 values: [ length ],
-                snapOnClickEnabled: false,
                 visibleElements: {
                   labels: true,
                   rangeLabels: true
                 },
               });
-
+              slider.steps = [...paths,4].map((item,index) =>index)
               slider.tickConfigs = [{
                 mode: "count",
-                values: length,
+                values: length+1,
                 labelsVisible: true,
                 tickCreatedFunction: function(initialValue, tickElement, labelElement) {
                   labelElement.innerHTML = 't' + labelElement["data-value"];
-                  // tickElement.classList.add("largeTicks");
-                  // labelElement.classList.add("largeLabels");
                   labelElement.onclick = function() {
                     const newValue = labelElement["data-value"];
                     slider.values = [ newValue ];
@@ -145,23 +133,17 @@ session_start();
               }];
               view.ui.add(slider);
             }
-
-
-
              return;
             }
           drawPoint(event.mapPoint)
           paths.push([longitude,latitude])
-          
+          //draw paths user
         }
         
-        // else {
-        //   view.graphics.removeAll();
-        //   addGraphic("start", event.mapPoint);
-        // }
+        
       });
       
-      function addGraphic(type, point) {
+      function addPoint(type, point) {
         var graphic = new Graphic({
           symbol: {
             type: "simple-marker",
@@ -185,9 +167,10 @@ session_start();
         routeTask.solve(routeParams).then(function (data) {
           // Display the route
           data.routeResults.forEach(function (result) {
+            //insert the route task
+            console.log(result.route.geometry.paths)
           document.getElementById("distance").value = result.route.attributes.Total_Kilometers.toFixed(2);
           document.getElementById("estimate-time").value = result.route.attributes.Total_TravelTime.toFixed(4);
-
             result.route.symbol = {
               type: "simple-line",
               color: [5, 150, 255],
@@ -196,40 +179,8 @@ session_start();
             view.graphics.add(result.route);
           });
         });
-
       }
-
-      
-
-      // const slider = new Slider({
-      //   container: "sliderDiv",
-      //   min: 0,
-      //   max: 10,
-      //   values: [ 10 ],
-      //   snapOnClickEnabled: false,
-      //   visibleElements: {
-      //     labels: true,
-      //     rangeLabels: true
-      //   },
-      // });
-
-      // slider.tickConfigs = [{
-      //   mode: "count",
-      //   values: 11,
-      //   labelsVisible: true,
-      //   tickCreatedFunction: function(initialValue, tickElement, labelElement) {
-      //     labelElement.innerHTML = 't' + labelElement["data-value"];
-      //     // tickElement.classList.add("largeTicks");
-      //     // labelElement.classList.add("largeLabels");
-      //     labelElement.onclick = function() {
-      //       const newValue = labelElement["data-value"];
-      //       slider.values = [ newValue ];
-      //     };
-      //   }
-      // }];
-      // view.ui.add(slider);
     });
-   
   </script>
   
 </head>
