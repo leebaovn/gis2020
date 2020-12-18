@@ -1,5 +1,5 @@
 <?php 
-  function node(){
+  function getArc(){
     $db = new mysqli("localhost","root","","deviation");
     // $db->query("SET NAMES utf8");
     if ($db -> connect_errno) {
@@ -38,13 +38,14 @@ function add_new_arc($list) {
   $new_arc = mysqli_fetch_assoc($result);
   $arc_id = $new_arc['id'];
 
-  $sql = '';
+  $sql = 'INSERT INTO arc_point (Arc_id, Point_id, Sequence) VALUES ';
   foreach($list as $key=>$value) {
     if ($key > 0 && $key < count($list) - 1) {
-      $sql .= "INSERT INTO arc_point (Arc_id, Point_id, Sequence) VALUES ($arc_id, $value, $key);";
+      $sql .= "($arc_id, $value, $key),";
     }
   }
-  $arc_point_result = $db -> multi_query($sql);
+  $sql=substr($sql,0,strlen($sql)-1);
+  $arc_point_result = $db -> query($sql);
   header('Content-type: application/json');
   return json_encode($arc_point_result);
   // return $db -> error;

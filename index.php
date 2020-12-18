@@ -9,6 +9,7 @@ session_start();
   <link rel="stylesheet" href="https://js.arcgis.com/4.17/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.17/"></script>
   <link rel="stylesheet" href="./style.css">
+
   <script defer>
     require([
       "esri/Map",
@@ -75,8 +76,8 @@ session_start();
       // };
       // xmlHttp.open('POST', 'db.php', true);
       // xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      // // xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
-      // // xmlHttp.send("function=node");
+      // xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
+      // xmlHttp.send("function=node");
       // let nodeList = "";
       // [1, 2, 3, 4, 5, 6].forEach(i => {
       //   nodeList += "&list[]=" + i;
@@ -99,7 +100,8 @@ session_start();
           document.getElementById("destination").value = `${longitude},${latitude}`;
           document.getElementById("status").innerHTML = 'Hãy chọn lộ trình di chuyển của bạn';
 
-          //Inser db 
+          //Inser arc db 
+          
           getRoute();
         } else{
           //Bắt đầu cho ghi nhận lộ trình di chuyển của user
@@ -180,6 +182,19 @@ session_start();
           });
         });
       }
+
+      function submit(){
+
+        const xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            console.log(this.responseText);
+          }
+        };
+        xmlHttp.open('POST', 'db.php', true);
+        xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
+      }
     });
   </script>
   
@@ -190,7 +205,7 @@ session_start();
     <div class='modal' id='modal'>
       <div class="overlay"></div>
       <div class="vehicle-form" id='vehicle-form'>
-        <form action="" method='POST'>
+        <form action="vehicle.php" method='POST'>
           <div class="field">
 
             <label for="id">Biển số xe</label><input type="text" name='id' id='id'>
@@ -200,7 +215,7 @@ session_start();
             <label for="color">Màu xe</label><input type="color" name='color' id='color'>
           </div>
           <div class="field">
-            <button type='submit'>Đăng ký</button>
+            <button type='submit' onclick="submit()">Đăng ký</button>
           </div>
         </form>
       </div>
@@ -231,7 +246,7 @@ session_start();
 </body>
 
 <?php
-  $_SESSION['vehicle']='12312';
+  // $_SESSION['vehicle']='12312';
     if(isset($_SESSION['vehicle'])){
       echo '<script type="text/javascript">
       document.getElementById("modal").style.display="none";
