@@ -13,20 +13,7 @@
     return json_encode($arc);
 }
 
-function add_new_vehicle($reg_plate, $color){
-  $db = new mysqli("localhost","root","","deviation_plus");
-  // $db->query("set names utf8");
-  if ($db -> connect_errno) {
-    return 'DATABASE CONNECT ERROR';
-  }
-  $db -> set_charset("utf8");
-  $new_vehicle = $db -> query("INSERT INTO vehicle (registration_plate, color) VALUES('$reg_plate','$color')");
-  header('Content-type: application/json');
-  return json_encode($new_vehicle);
-  // return $db -> error;
-}
-
-function add_new_arc($list) {
+function add_new_route($list) {
   $db = new mysqli("localhost", "root", "", "deviation_plus");
   if ($db -> connect_errno) {
     return "DATABASE CONNECT ERROR";
@@ -69,8 +56,8 @@ function add_new_arc($list) {
       case 'add_new_vehicle':
         echo add_new_vehicle($_POST['reg_plate'], $_POST['color']);
         break;
-      case 'add_new_arc':
-        echo add_new_arc($_POST['list']);
+      case 'add_new_route':
+        echo add_new_route($_POST['list']);
         break;
       default:
         echo false;

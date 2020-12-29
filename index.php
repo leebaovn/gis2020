@@ -67,22 +67,22 @@ session_start();
         url: "https://utility.arcgis.com/usrsvcs/appservices/gnSXcBKOBpfoK98l/rest/services/World/Route/NAServer/Route_World/solve"
       });
 
-      const xmlHttp = new XMLHttpRequest();
-      xmlHttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          // document.getElementById("demo").innerHTML = this.responseText;
-          console.log(this.responseText);
-        }
-      };
-      xmlHttp.open('POST', 'db.php', true);
-      xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      // xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
-      // xmlHttp.send("function=node");
-      let nodeList = "";
-      [[1, 2], [3, 4], [5, 6]].forEach(i => {
-        nodeList += "&list[]=" + i;
-      });
-      xmlHttp.send("function=add_new_arc" + nodeList);
+      // const xmlHttp = new XMLHttpRequest();
+      // xmlHttp.onreadystatechange = function() {
+      //   if (this.readyState == 4 && this.status == 200) {
+      //     // document.getElementById("demo").innerHTML = this.responseText;
+      //     console.log(this.responseText);
+      //   }
+      // };
+      // xmlHttp.open('POST', 'db.php', true);
+      // xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      // // xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
+      // // xmlHttp.send("function=node");
+      // let nodeList = "";
+      // [[1, 2], [3, 4], [5, 6]].forEach(i => {
+      //   nodeList += "&list[]=" + i;
+      // });
+      // xmlHttp.send("function=add_new_arc" + nodeList);
 
       let paths = []
       let starter = []
@@ -105,8 +105,7 @@ session_start();
           console.log(start.geometry.latitude, start.geometry.longitude,'start');
           console.log(des.geometry.latitude, des.geometry.longitude, 'des');
           //Inser arc db 
-          
-          getRoute();
+          getRoute([start.geometry.latitude, start.geometry.longitude],[des.geometry.latitude, des.geometry.longitude]);
         } else{
           //Bắt đầu cho ghi nhận lộ trình di chuyển của user
           if(view.graphics.length > 6) {
@@ -161,7 +160,7 @@ session_start();
         view.graphics.add(graphic);
       }
 
-      function getRoute() {
+      function getRoute(start, des) {
        
         var routeParams = new RouteParameters({
           stops: new FeatureSet({
@@ -175,6 +174,25 @@ session_start();
           data.routeResults.forEach(function (result) {
             //insert the route task
             console.log(result.route.geometry.paths) // route task []
+            const Arc = [start,...result.route.geometry.paths,des];
+
+            const xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+              if (this.readyState == 4 && this.status == 200) {
+                // document.getElementById("demo").innerHTML = this.responseText;
+                console.log(this.responseText);
+              }
+            };
+            xmlHttp.open('POST', 'db.php', true);
+            xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            // xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
+            // xmlHttp.send("function=node");
+            let nodeList = "";
+            Arc.forEach(i => {
+              nodeList += "&list[]=" + i;
+            });
+            xmlHttp.send("function=add_new_route" + nodeList);
+
           document.getElementById("distance").value = result.route.attributes.Total_Kilometers.toFixed(2);
           document.getElementById("estimate-time").value = result.route.attributes.Total_TravelTime.toFixed(4);
             result.route.symbol = {
