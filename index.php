@@ -5,11 +5,16 @@ session_start();
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Deviation detection</title>
+  <title>Deviation detection1111</title>
   <link rel="stylesheet" href="https://js.arcgis.com/4.17/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.17/"></script>
   <link rel="stylesheet" href="./style.css">
-
+<?php
+$vehicle_id=""; 
+  if(isset($_SESSION['vehicle'])){
+    $vehicle_id=$_SESSION['vehicle']['id'];
+  }
+?>
   <script defer>
     require([
       "esri/Map",
@@ -83,6 +88,7 @@ session_start();
       //   nodeList += "&list[]=" + i;
       // });
       // xmlHttp.send("function=add_new_arc" + nodeList);
+      let vehicle_id = "<?php echo $vehicle_id; ?>";
 
       let paths = []
       let starter = []
@@ -95,15 +101,13 @@ session_start();
         if (view.graphics.length === 0) {
           addPoint("start", event.mapPoint);
           document.getElementById("start").value = `${longitude},${latitude}`;
+          
         } else if (view.graphics.length === 1) {
           addPoint("finish", event.mapPoint);
           document.getElementById("destination").value = `${longitude},${latitude}`;
           document.getElementById("status").innerHTML = 'Hãy chọn lộ trình di chuyển của bạn';
-          console.log(view.graphics.items[0],'zzzzzzzzzz') // start
-          console.log(view.graphics.items[1],'zzzzzzzzzz') // des
           const [start, des] = view.graphics.items;
-          console.log(start.geometry.latitude, start.geometry.longitude,'start');
-          console.log(des.geometry.latitude, des.geometry.longitude, 'des');
+          
           //Inser arc db 
           getRoute([start.geometry.latitude, start.geometry.longitude],[des.geometry.latitude, des.geometry.longitude]);
         } else{
@@ -174,8 +178,8 @@ session_start();
           data.routeResults.forEach(function (result) {
             //insert the route task
             console.log(result.route.geometry.paths) // route task []
-            const Arc = [start,...result.route.geometry.paths,des];
-
+            const Arc = [start,...result.route.geometry.paths[0],des];
+            console.log(Arc,'ggggggg')
             const xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
               if (this.readyState == 4 && this.status == 200) {
@@ -191,7 +195,9 @@ session_start();
             Arc.forEach(i => {
               nodeList += "&list[]=" + i;
             });
-            xmlHttp.send("function=add_new_route" + nodeList);
+            console.log(vehicle_id,'vehicleId');
+            debugger;
+            xmlHttp.send("function=add_new_route" + nodeList+"&vehicle_id="+vehicle_id);
 
           document.getElementById("distance").value = result.route.attributes.Total_Kilometers.toFixed(2);
           document.getElementById("estimate-time").value = result.route.attributes.Total_TravelTime.toFixed(4);

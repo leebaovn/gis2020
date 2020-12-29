@@ -70,7 +70,7 @@ function add_new_route($list, $vehicle_id) {
         echo add_new_vehicle($_POST['reg_plate'], $_POST['color']);
         break;
       case 'add_new_route':
-        echo add_new_route($_POST['list']);
+        echo add_new_route($_POST['list'],$_POST['vehicle_id']);
         break;
       default:
         echo false;
