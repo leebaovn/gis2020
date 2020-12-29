@@ -26,7 +26,7 @@ function add_new_vehicle($reg_plate, $color){
   // return $db -> error;
 }
 
-function add_new_arc($list) {
+function add_new_route($list, $vehicle_id) {
   $db = new mysqli("localhost", "root", "", "deviation_plus");
   if ($db -> connect_errno) {
     return "DATABASE CONNECT ERROR";
@@ -43,7 +43,7 @@ function add_new_arc($list) {
 
   $last = array_pop($points);
 
-  $db -> query("INSERT INTO arc (point_begin_id, point_end_id) VALUES($points[0], $last)");
+  $db -> query("INSERT INTO arc (point_begin_id, point_end_id, vehicle_id) VALUES($points[0], $last, '$vehicle_id')");
   $arc_id = $db -> insert_id;
 
   $add_arc_point_query = 'INSERT INTO arc_point (arc_id, point_id, sequence) VALUES ';
@@ -69,8 +69,8 @@ function add_new_arc($list) {
       case 'add_new_vehicle':
         echo add_new_vehicle($_POST['reg_plate'], $_POST['color']);
         break;
-      case 'add_new_arc':
-        echo add_new_arc($_POST['list']);
+      case 'add_new_route':
+        echo add_new_route($_POST['list']);
         break;
       default:
         echo false;
