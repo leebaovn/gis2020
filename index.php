@@ -67,22 +67,22 @@ session_start();
         url: "https://utility.arcgis.com/usrsvcs/appservices/gnSXcBKOBpfoK98l/rest/services/World/Route/NAServer/Route_World/solve"
       });
 
-      // const xmlHttp = new XMLHttpRequest();
-      // xmlHttp.onreadystatechange = function() {
-      //   if (this.readyState == 4 && this.status == 200) {
-      //     // document.getElementById("demo").innerHTML = this.responseText;
-      //     console.log(this.responseText);
-      //   }
-      // };
-      // xmlHttp.open('POST', 'db.php', true);
-      // xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      const xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          // document.getElementById("demo").innerHTML = this.responseText;
+          console.log(this.responseText);
+        }
+      };
+      xmlHttp.open('POST', 'db.php', true);
+      xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
       // xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
       // xmlHttp.send("function=node");
-      // let nodeList = "";
-      // [1, 2, 3, 4, 5, 6].forEach(i => {
-      //   nodeList += "&list[]=" + i;
-      // });
-      // xmlHttp.send("function=add_new_arc" + nodeList);
+      let nodeList = "";
+      [[1, 2], [3, 4], [5, 6]].forEach(i => {
+        nodeList += "&list[]=" + i;
+      });
+      xmlHttp.send("function=add_new_arc" + nodeList);
 
       let paths = []
       let starter = []

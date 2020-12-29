@@ -26,28 +26,37 @@ function add_new_vehicle($reg_plate, $color){
   // return $db -> error;
 }
 
-function add_new_arc($list) {
+function add_new_route($list) {
   $db = new mysqli("localhost", "root", "", "deviation");
   if ($db -> connect_errno) {
     return "DATABASE CONNECT ERROR";
   }
   $db -> set_charset("utf8");
-  $last = array_pop($list);
 
-  $result = $db -> query("SELECT * FROM arc WHERE node_begin_id=$list[0] AND node_end_id=$last");
-  $new_arc = mysqli_fetch_assoc($result);
-  $arc_id = $new_arc['id'];
-
-  $sql = 'INSERT INTO arc_point (Arc_id, Point_id, Sequence) VALUES ';
+  $points = [];
+  $add_points_query = 'INSERT INTO point (longitude, latitude) VALUES';
   foreach($list as $key=>$value) {
-    if ($key > 0 && $key < count($list) - 1) {
-      $sql .= "($arc_id, $value, $key),";
+    $point = explode(',', $value);
+    $db -> query($add_points_query."($point[0], $point[1])");
+    array_push($points, $db -> insert_id);
+  }
+
+  $last = array_pop($points);
+
+  $db -> query("INSERT INTO arc (point_begin_id, point_end_id) VALUES($points[0], $last)");
+  $arc_id = $db -> insert_id;
+
+  $add_arc_point_query = 'INSERT INTO arc_point (arc_id, point_id, sequence) VALUES ';
+  foreach($points as $key=>$value) {
+    if ($key > 0) {
+      $add_arc_point_query .= "($arc_id, $value, $key),";
     }
   }
-  $sql=substr($sql,0,strlen($sql)-1);
-  $arc_point_result = $db -> query($sql);
+
+  $add_arc_point_query=substr($add_arc_point_query, 0, strlen($add_arc_point_query) - 1);
+  $add_arc_point_result = $db -> query($add_arc_point_query);
   header('Content-type: application/json');
-  return json_encode($arc_point_result);
+  return json_encode($add_arc_point_result);
   // return $db -> error;
   // return $sql;
 }
