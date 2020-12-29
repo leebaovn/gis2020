@@ -13,7 +13,20 @@
     return json_encode($arc);
 }
 
-function add_new_route($list) {
+function add_new_vehicle($reg_plate, $color){
+  $db = new mysqli("localhost","root","","deviation_plus");
+  // $db->query("set names utf8");
+  if ($db -> connect_errno) {
+    return 'DATABASE CONNECT ERROR';
+  }
+  $db -> set_charset("utf8");
+  $new_vehicle = $db -> query("INSERT INTO vehicle (registration_plate, color) VALUES('$reg_plate','$color')");
+  header('Content-type: application/json');
+  return json_encode($new_vehicle);
+  // return $db -> error;
+}
+
+function add_new_route($list, $vehicle_id) {
   $db = new mysqli("localhost", "root", "", "deviation_plus");
   if ($db -> connect_errno) {
     return "DATABASE CONNECT ERROR";
@@ -30,7 +43,7 @@ function add_new_route($list) {
 
   $last = array_pop($points);
 
-  $db -> query("INSERT INTO arc (point_begin_id, point_end_id) VALUES($points[0], $last)");
+  $db -> query("INSERT INTO arc (point_begin_id, point_end_id, vehicle_id) VALUES($points[0], $last, '$vehicle_id')");
   $arc_id = $db -> insert_id;
 
   $add_arc_point_query = 'INSERT INTO arc_point (arc_id, point_id, sequence) VALUES ';
