@@ -1,6 +1,6 @@
 <?php 
   function getArc(){
-    $db = new mysqli("localhost","root","","deviation");
+    $db = new mysqli("localhost","root","","deviation_plus");
     // $db->query("SET NAMES utf8");
     if ($db -> connect_errno) {
       return 'DATABASE CONNECT ERROR';
@@ -8,13 +8,13 @@
     $db -> set_charset("utf8");
     $result = $db -> query("SELECT * FROM arc");
     while($row = mysqli_fetch_assoc($result))
-    $arc[] = $row;
+      $arc[] = $row;  
     header('Content-type: application/json');
     return json_encode($arc);
 }
 
 function add_new_vehicle($reg_plate, $color){
-  $db = new mysqli("localhost","root","","deviation");
+  $db = new mysqli("localhost","root","","deviation_plus");
   // $db->query("set names utf8");
   if ($db -> connect_errno) {
     return 'DATABASE CONNECT ERROR';
@@ -27,7 +27,7 @@ function add_new_vehicle($reg_plate, $color){
 }
 
 function add_new_arc($list) {
-  $db = new mysqli("localhost", "root", "", "deviation");
+  $db = new mysqli("localhost", "root", "", "deviation_plus");
   if ($db -> connect_errno) {
     return "DATABASE CONNECT ERROR";
   }
