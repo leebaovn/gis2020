@@ -99,7 +99,11 @@ session_start();
           addPoint("finish", event.mapPoint);
           document.getElementById("destination").value = `${longitude},${latitude}`;
           document.getElementById("status").innerHTML = 'Hãy chọn lộ trình di chuyển của bạn';
-
+          console.log(view.graphics.items[0],'zzzzzzzzzz') // start
+          console.log(view.graphics.items[1],'zzzzzzzzzz') // des
+          const [start, des] = view.graphics.items;
+          console.log(start.geometry.latitude, start.geometry.longitude,'start');
+          console.log(des.geometry.latitude, des.geometry.longitude, 'des');
           //Inser arc db 
           
           getRoute();
@@ -170,7 +174,7 @@ session_start();
           // Display the route
           data.routeResults.forEach(function (result) {
             //insert the route task
-            console.log(result.route.geometry.paths)
+            console.log(result.route.geometry.paths) // route task []
           document.getElementById("distance").value = result.route.attributes.Total_Kilometers.toFixed(2);
           document.getElementById("estimate-time").value = result.route.attributes.Total_TravelTime.toFixed(4);
             result.route.symbol = {
@@ -183,18 +187,7 @@ session_start();
         });
       }
 
-      function submit(){
-
-        const xmlHttp = new XMLHttpRequest();
-        xmlHttp.onreadystatechange = function() {
-          if (this.readyState == 4 && this.status == 200) {
-            console.log(this.responseText);
-          }
-        };
-        xmlHttp.open('POST', 'db.php', true);
-        xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
-      }
+      
     });
   </script>
   
@@ -207,7 +200,6 @@ session_start();
       <div class="vehicle-form" id='vehicle-form'>
         <form action="vehicle.php" method='POST'>
           <div class="field">
-
             <label for="id">Biển số xe</label><input type="text" name='id' id='id'>
           </div>
           <div class="field">
@@ -215,7 +207,7 @@ session_start();
             <label for="color">Màu xe</label><input type="color" name='color' id='color'>
           </div>
           <div class="field">
-            <button type='submit' onclick="submit()">Đăng ký</button>
+            <button type='submit' >Đăng ký</button>
           </div>
         </form>
       </div>
@@ -246,11 +238,10 @@ session_start();
 </body>
 
 <?php
-  // $_SESSION['vehicle']='12312';
-    if(isset($_SESSION['vehicle'])){
-      echo '<script type="text/javascript">
-      document.getElementById("modal").style.display="none";
-      </script>';
-    }
+  if(isset($_SESSION['vehicle'])){
+    echo '<script type="text/javascript">
+    document.getElementById("modal").style.display="none";
+    </script>';
+  }
 ?>
 </html>
