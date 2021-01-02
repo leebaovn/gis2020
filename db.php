@@ -61,6 +61,26 @@ function add_new_route($list, $vehicle_id) {
   // return $sql;
 }
 
+function add_gps_point($point, $vehicle_id, $arc_id) {
+  $db = new mysqli("localhost", "root", "", "deviation_plus");
+  if ($db -> connect_errno) {
+    return "DATABASE CONNECT ERROR";
+  }
+  $db -> set_charset("utf8");
+  $db -> query("INSERT INTO point (longitude, latitude) VALUES($point[0], $point[1])");
+  $point_id = $db -> insert_id;
+
+  $deviation = calculateDeviation($point, $arc_id);
+
+  $db -> query("INSERT INTO gps_point (deviation, point_id, vehicle_id) VALUES($deviation, $point_id, $vehicle_id)");
+  header('Content-type: application/json');
+  return $db -> error;
+}
+
+function calculateDeviation($point, $arc_id) {
+  return 0;
+}
+
   if (isset($_POST['function'])) {
     switch ($_POST['function']) {
       case 'node':
@@ -72,6 +92,11 @@ function add_new_route($list, $vehicle_id) {
       case 'add_new_route':
         echo add_new_route($_POST['list'],$_POST['vehicle_id']);
         break;
+
+      case 'add_gps_point':
+        echo add_gps_point($_POST['point'], $_POST['vehicle_id'], $_POST['arc_id']);
+        break;
+        
       default:
         echo false;
         break;
