@@ -95,10 +95,20 @@ align-items: center;
 
 #btn{
   position: fixed;
-  width:100%;
   bottom:1rem;
 
+  width:100%;
+
   text-align: center;
+  z-index: 10;
+}
+
+.btnEle{
+  padding:8px 16px;
+  border-radius: 4px;
+
+  font-size: 1rem;
+  background-color: greenyellow;
 }
 
 .modal{

@@ -27,6 +27,8 @@ session_start();
       "esri/widgets/Slider",
       "esri/tasks/support/MultipartColorRamp",
     ], function(Map, MapView, RouteTask, RouteParameters, FeatureSet, Graphic, Slider, MultipartColorRamp) {
+
+
       function drawPoint(point) {
         var graphic = new Graphic({
           symbol: {
@@ -73,27 +75,12 @@ session_start();
         url: "https://utility.arcgis.com/usrsvcs/appservices/gnSXcBKOBpfoK98l/rest/services/World/Route/NAServer/Route_World/solve"
       });
 
-      // const xmlHttp = new XMLHttpRequest();
-      // xmlHttp.onreadystatechange = function() {
-      //   if (this.readyState == 4 && this.status == 200) {
-      //     // document.getElementById("demo").innerHTML = this.responseText;
-      //     console.log(this.responseText);
-      //   }
-      // };
-      // xmlHttp.open('POST', 'db.php', true);
-      // xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      // // xmlHttp.send("function=add_new_vehicle&reg_plate=abc&color=red");
-      // // xmlHttp.send("function=node");
-      // let nodeList = "";
-      // [[1, 2], [3, 4], [5, 6]].forEach(i => {
-      //   nodeList += "&list[]=" + i;
-      // });
-      // xmlHttp.send("function=add_new_arc" + nodeList);
       let vehicle_id = "<?php echo $vehicle_id; ?>";
 
       let paths = []
       let starter = []
       let isOk = false;
+      let isComplete = false;
       view.on("click", function(event) {
         const {
           longitude,
@@ -110,50 +97,54 @@ session_start();
           addPoint("finish", event.mapPoint);
           document.getElementById("destination").value = `${longitude},${latitude}`;
           document.getElementById("status").innerHTML = 'Hãy chọn lộ trình di chuyển của bạn';
-          let btn = document.createElement('button');
-          btn.attributes.value = 'Hoàn tất'
-          document.getElementById('btn').appendChild(btn);
+          let btn = document.createElement("button");
+          btn.className = 'btnELe';
+          btn.innerHTML = 'Hoàn tất';
+          btn.addEventListener('click', function() {
+            isComplete = true;
+
+            drawLine(paths)
+            isOk = true;
+            const {
+              length
+            } = paths;
+            const slider = new Slider({
+              container: "sliderDiv",
+              min: 0,
+              max: length,
+              values: [length],
+              visibleElements: {
+                labels: true,
+                rangeLabels: true
+              },
+            });
+            slider.steps = [...paths, 4].map((item, index) => index)
+            slider.tickConfigs = [{
+              mode: "count",
+              values: length + 1,
+              labelsVisible: true,
+              tickCreatedFunction: function(initialValue, tickElement, labelElement) {
+                labelElement.innerHTML = 't' + labelElement["data-value"];
+                labelElement.onclick = function() {
+                  const newValue = labelElement["data-value"];
+                  slider.values = [newValue];
+                };
+              }
+            }];
+            view.ui.add(slider);
+
+            btn.remove();
+          })
+          document.getElementById("btn").appendChild(btn);
           //Inser arc db 
           const [start, des] = view.graphics.items;
           getRoute([start.geometry.latitude, start.geometry.longitude], [des.geometry.latitude, des.geometry.longitude]);
         } else {
           //Bắt đầu cho ghi nhận lộ trình di chuyển của user
-          if (view.graphics.length > 6) {
-            if (!isOk) {
-              drawLine(paths)
-              isOk = true;
-              const {
-                length
-              } = paths;
-              const slider = new Slider({
-                container: "sliderDiv",
-                min: 0,
-                max: length,
-                values: [length],
-                visibleElements: {
-                  labels: true,
-                  rangeLabels: true
-                },
-              });
-              slider.steps = [...paths, 4].map((item, index) => index)
-              slider.tickConfigs = [{
-                mode: "count",
-                values: length + 1,
-                labelsVisible: true,
-                tickCreatedFunction: function(initialValue, tickElement, labelElement) {
-                  labelElement.innerHTML = 't' + labelElement["data-value"];
-                  labelElement.onclick = function() {
-                    const newValue = labelElement["data-value"];
-                    slider.values = [newValue];
-                  };
-                }
-              }];
-              view.ui.add(slider);
-            }
-            return;
+          if (!isComplete) {
+            drawPoint(event.mapPoint)
+            paths.push([longitude, latitude])
           }
-          drawPoint(event.mapPoint)
-          paths.push([longitude, latitude])
           //draw paths user
         }
 
@@ -265,9 +256,11 @@ session_start();
 </body>
 
 <?php
+
 if (isset($_SESSION['vehicle'])) {
   echo '<script type="text/javascript">
     document.getElementById("modal").style.display="none";
+    
     </script>';
 }
 ?>
