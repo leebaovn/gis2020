@@ -67,14 +67,14 @@ function add_gps_point($point, $vehicle_id, $arc_id) {
     return "DATABASE CONNECT ERROR";
   }
   $db -> set_charset("utf8");
-  $db -> query('INSERT INTO point (longitude, latitude) VALUES ($point[0], $point[1])');
+  $db -> query("INSERT INTO point (longitude, latitude) VALUES($point[0], $point[1])");
   $point_id = $db -> insert_id;
 
   $deviation = calculateDeviation($point, $arc_id);
 
-  $db -> query('INSERT INTO gps_point (point_id, vehicle_id, deviation) VALUES ($point_id, $vehicle_id, $deviation)');
+  $db -> query("INSERT INTO gps_point (deviation, point_id, vehicle_id) VALUES($deviation, $point_id, $vehicle_id)");
   header('Content-type: application/json');
-  return $deviation;
+  return $db -> error;
 }
 
 function calculateDeviation($point, $arc_id) {
