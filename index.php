@@ -34,19 +34,19 @@ session_start();
       const DEVIATION_LEVEL = {
         low: {
           color: '255, 255, 1',
-          message: 'Bạn vừa rời khỏi lộ trình của mình.'
+          message: 'Low: Bạn vừa rời khỏi lộ trình của mình.'
         },
         medium: {
           color: '255, 182, 1',
-          message: 'Bạn đã cách xa lộ trình. Hãy trở lại lộ trình.'
+          message: 'Medium: Bạn đã cách xa lộ trình. Hãy trở lại lộ trình.'
         },
         high: {
           color: '252, 110, 4',
-          message: 'Bạn đã đi rất xa lộ trình. Hãy trở lại đúng lộ trình.'
+          message: 'High: Bạn đã đi rất xa lộ trình. Hãy trở lại đúng lộ trình.'
         },
         uncontrol: {
           color: '255, 0, 0',
-          message: 'Bạn đã bị mất kiểm soát. Hãy trở lại đúng lộ trình.'
+          message: 'Uncontrol: Bạn đã bị mất kiểm soát. Hãy trở lại đúng lộ trình.'
         },
       };
       const THRESHOLD = {
@@ -100,18 +100,21 @@ session_start();
       var routeTask = new RouteTask({
         url: "https://utility.arcgis.com/usrsvcs/appservices/gnSXcBKOBpfoK98l/rest/services/World/Route/NAServer/Route_World/solve"
       });
-
+      //Get data from session
       let vehicle_id = "<?php echo $vehicle_id; ?>";
       let color = "<?php echo $color; ?>";
-      let startDrag = false;
+
+      //Initial variables 
       let paths = []
       let pathPoints = []
       let deviation = []
       let starter = []
       let currentNode = null;
-
+      //Flag variables
+      let startDrag = false;
       let isOk = false;
       let isComplete = false;
+
       view.on("click", function(event) {
         const {
           longitude,
@@ -128,6 +131,7 @@ session_start();
           addPoint("finish", event.mapPoint);
           document.getElementById("destination").value = `${longitude},${latitude}`;
           document.getElementById("status").innerHTML = 'Hãy chọn lộ trình di chuyển của bạn';
+
           let btn = document.createElement("button");
           btn.className = 'btnELe';
           btn.innerHTML = 'Hoàn tất';
@@ -138,6 +142,7 @@ session_start();
             const {
               length
             } = paths;
+            //add Slider for time dimension
             const slider = new Slider({
               container: "sliderDiv",
               min: 0,
@@ -161,19 +166,20 @@ session_start();
                 };
               }
             }];
+            //event for sliding time
             slider.on('thumb-drag', function({
               index,
               state,
               type,
               value
             }) {
-
               if (state === 'stop') {
                 if (startDrag) {
                   view.graphics.remove(currentNode)
                   const divBefore = document.getElementsByClassName('flicker');
                   document.getElementById("btn").removeChild(divBefore[0])
                 }
+                //draw current Position
                 var graphicPath = new Graphic({
                   symbol: {
                     type: "simple-marker",
@@ -185,11 +191,13 @@ session_start();
                 view.graphics.add(graphicPath);
                 startDrag = true;
                 currentNode = graphicPath
+                //Style for deviation message
                 if (deviation.length) {
                   const {
                     color,
                     message
                   } = transformLevel(deviation[value]);
+                  document.getElementById('deviation').value = +deviation[value] * 1000
                   var style = document.createElement('style');
                   style.type = 'text/css';
                   var keyFrames = `
@@ -214,12 +222,12 @@ session_start();
               }
             })
             view.ui.add(slider);
-
+            //Remove button when show slider
             btn.remove();
           })
           document.getElementById("btn").appendChild(btn);
-          //Inser arc db 
           const [start, des] = view.graphics.items;
+          //get Route
           getRoute([start.geometry.latitude, start.geometry.longitude], [des.geometry.latitude, des.geometry.longitude]);
         } else {
           //Bắt đầu cho ghi nhận lộ trình di chuyển của user
@@ -301,7 +309,7 @@ session_start();
           });
         });
       }
-
+      //convert deviation to data
       function transformLevel(deviation) {
         if (deviation >= THRESHOLD.uncontrol) {
           return DEVIATION_LEVEL.uncontrol;
@@ -360,6 +368,10 @@ session_start();
       <div class='header__info'>
         <label>Ước lượng thời gian (phút)</label>
         <input type="text" id='estimate-time'>
+      </div>
+      <div class='header__info'>
+        <label>Độ lệch</label>
+        <input type="text" id='deviation'>
       </div>
     </div>
     <div id="btn"></div>

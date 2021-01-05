@@ -154,6 +154,9 @@ function calculate_height($p1, $p2, $p3)
   $l1 = calculate_length($p1, $p2);
   $l2 = calculate_length($p3, $p1);
   $l3 = calculate_length($p3, $p2);
+  if (round($l2 + $l3, 5) === round($l1, 5)) {
+    return 0;
+  }
   if ($l1 > 0) {
     return $l2 * $l3 / $l1;
   } else return 0;
