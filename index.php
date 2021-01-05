@@ -107,7 +107,6 @@ session_start();
           btn.innerHTML = 'Hoàn tất';
           btn.addEventListener('click', function() {
             isComplete = true;
-
             drawLine(paths)
             isOk = true;
             const {
