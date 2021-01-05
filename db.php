@@ -14,41 +14,43 @@
     return json_encode($arc);
 }
 
-function add_new_vehicle($reg_plate, $color){
-  $db = new mysqli("localhost","root","","deviation_plus");
+function add_new_vehicle($reg_plate, $color)
+{
+  $db = new mysqli("localhost", "root", "", "deviation_plus");
   // $db->query("set names utf8");
-  if ($db -> connect_errno) {
+  if ($db->connect_errno) {
     return 'DATABASE CONNECT ERROR';
   }
-  $db -> set_charset("utf8");
-  $new_vehicle = $db -> query("INSERT INTO vehicle (registration_plate, color) VALUES('$reg_plate','$color')");
+  $db->set_charset("utf8");
+  $new_vehicle = $db->query("INSERT INTO vehicle (registration_plate, color) VALUES('$reg_plate','$color')");
   header('Content-type: application/json');
   return json_encode($new_vehicle);
   // return $db -> error;
 }
 
-function add_new_route($list, $vehicle_id) {
+function add_new_route($list, $vehicle_id)
+{
   $db = new mysqli("localhost", "root", "", "deviation_plus");
-  if ($db -> connect_errno) {
+  if ($db->connect_errno) {
     return "DATABASE CONNECT ERROR";
   }
-  $db -> set_charset("utf8");
+  $db->set_charset("utf8");
 
   $points = [];
   $add_points_query = 'INSERT INTO point (longitude, latitude) VALUES';
-  foreach($list as $key=>$value) {
+  foreach ($list as $key => $value) {
     $point = explode(',', $value);
-    $db -> query($add_points_query."($point[0], $point[1])");
-    array_push($points, $db -> insert_id);
+    $db->query($add_points_query . "($point[0], $point[1])");
+    array_push($points, $db->insert_id);
   }
 
   $last = array_pop($points);
 
-  $db -> query("INSERT INTO arc (point_begin_id, point_end_id, vehicle_id) VALUES($points[0], $last, '$vehicle_id')");
-  $arc_id = $db -> insert_id;
+  $db->query("INSERT INTO arc (point_begin_id, point_end_id, vehicle_id) VALUES($points[0], $last, '$vehicle_id')");
+  $arc_id = $db->insert_id;
 
   $add_arc_point_query = 'INSERT INTO arc_point (arc_id, point_id, sequence) VALUES ';
-  foreach($points as $key=>$value) {
+  foreach ($points as $key => $value) {
     if ($key > 0) {
       $add_arc_point_query .= "($arc_id, $value, $key),";
     }
@@ -66,14 +68,15 @@ function add_new_route($list, $vehicle_id) {
   // return $sql;
 }
 
-function add_gps_point($point, $vehicle_id, $arc_id) {
+function add_gps_point($point, $vehicle_id, $arc_id)
+{
   $db = new mysqli("localhost", "root", "", "deviation_plus");
-  if ($db -> connect_errno) {
+  if ($db->connect_errno) {
     return "DATABASE CONNECT ERROR";
   }
-  $db -> set_charset("utf8");
-  $db -> query("INSERT INTO point (longitude, latitude) VALUES($point[0], $point[1])");
-  $point_id = $db -> insert_id;
+  $db->set_charset("utf8");
+  $db->query("INSERT INTO point (longitude, latitude) VALUES($point[0], $point[1])");
+  $point_id = $db->insert_id;
 
   $deviation = calculate_deviation($point_id, $arc_id);
 
@@ -183,4 +186,4 @@ function calculate_length($p1, $p2) {
         break;
     }
   }
-?>
+}
