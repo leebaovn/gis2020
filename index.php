@@ -12,8 +12,12 @@ session_start();
   <link rel="stylesheet" href="./style.css">
   <?php
   $vehicle_id = "";
+  $arc_id = "";
   if (isset($_SESSION['vehicle'])) {
     $vehicle_id = $_SESSION['vehicle']['id'];
+  }
+  if (isset($_SESSION['arc_id'])) {
+    $arc_id = $_SESSION['arc_id'];
   }
   ?>
   <script defer>
@@ -76,6 +80,7 @@ session_start();
       });
 
       let vehicle_id = "<?php echo $vehicle_id; ?>";
+      let arc_id = "<?php echo $arc_id; ?>";
 
       let paths = []
       let starter = []
@@ -144,8 +149,18 @@ session_start();
           if (!isComplete) {
             drawPoint(event.mapPoint)
             paths.push([longitude, latitude])
+            const xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+              if (this.readyState == 4 && this.status == 200) {
+                console.log(this.responseText);
+              }
+            };
+            xmlHttp.open('POST', 'db.php', true);
+            xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            xmlHttp.send("function=add_gps_point&point[]=" + longitude + "&point[]=" + latitude + "&vehicle_id=" + vehicle_id + "&arc_id=" + arc_id);
           }
           //draw paths user
+
         }
 
 
