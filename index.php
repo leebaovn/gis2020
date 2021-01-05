@@ -32,10 +32,16 @@ session_start();
       "esri/tasks/support/MultipartColorRamp",
     ], function(Map, MapView, RouteTask, RouteParameters, FeatureSet, Graphic, Slider, MultipartColorRamp) {
       const DEVIATION_LEVEL = {
-        low: '#ffff01',
-        medium: '#ffb601',
-        high: '#fc6e04',
-        uncontrol: '#ff0000'
+        low: 'rgb(255, 255, 1)',
+        medium: 'rgb(255, 182, 1)',
+        high: 'rgb(252, 110, 4)',
+        uncontrol: 'rgb(255, 0, 0)'
+      };
+      const THRESHOLD = {
+        low: 0.00015,
+        medium: 0.0002,
+        high: 0.00025,
+        uncontrol: 0.0003
       };
 
       function drawPoint(point, color = 'gray') {
@@ -183,7 +189,9 @@ session_start();
                   document.getElementsByTagName('head')[0].appendChild(style);
                   const div = document.createElement('div');
                   div.className = 'flicker';
-                  document.getElementById('btn').appendChild(div)
+                  document.getElementById('btn').appendChild(div);
+                  const color = transformLevel(deviation[value]);
+                  console.log('COLOR', color);
                 }
               }
             })
@@ -275,7 +283,21 @@ session_start();
           });
         });
       }
-
+      function transformLevel(deviation) {
+        if (deviation >= THRESHOLD.uncontrol) {
+          return DEVIATION_LEVEL.uncontrol;
+        } 
+        if (deviation >= THRESHOLD.high) {
+          return DEVIATION_LEVEL.high;
+        }
+        if (deviation >= THRESHOLD.medium) {
+          return DEVIATION_LEVEL.medium;
+        }
+        if (deviation >= THRESHOLD.low) {
+          return DEVIATION_LEVEL.low;
+        }
+        return 'transparent';
+      }
 
     });
   </script>
@@ -324,6 +346,7 @@ session_start();
     <div id="btn"></div>
     <div id="viewDiv"></div>
     <div id="sliderDiv" class="footer"></div>
+    <div class="color-ramps"></div>
   </div>
 </body>
 
