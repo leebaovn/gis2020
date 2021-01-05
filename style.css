@@ -112,7 +112,7 @@ align-items: center;
   background-color: greenyellow;
 }
 
-@keyframes warningDeviation{
+/* @keyframes warningDeviation{
   from{
     background-color: rgba(255,0,0,0.4);
   }
@@ -120,7 +120,7 @@ align-items: center;
     background-color: rgba(255,0,0,0.1);
 
   }
-}
+} */
 
 .flicker{
   position: fixed;
@@ -129,6 +129,11 @@ align-items: center;
   right:0;
   bottom:8rem;
 
+  display: flex;
+  justify-content: center;
+
+  font-weight: 600;
+  font-size: 1.2rem;
 
   animation: warningDeviation ease-in 2s infinite;
   transition: all 0.3s;

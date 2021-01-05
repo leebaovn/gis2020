@@ -32,10 +32,22 @@ session_start();
       "esri/tasks/support/MultipartColorRamp",
     ], function(Map, MapView, RouteTask, RouteParameters, FeatureSet, Graphic, Slider, MultipartColorRamp) {
       const DEVIATION_LEVEL = {
-        low: 'rgb(255, 255, 1)',
-        medium: 'rgb(255, 182, 1)',
-        high: 'rgb(252, 110, 4)',
-        uncontrol: 'rgb(255, 0, 0)'
+        low: {
+          color: '255, 255, 1',
+          message: 'Bạn vừa rời khỏi lộ trình của mình.'
+        },
+        medium: {
+          color: '255, 182, 1',
+          message: 'Bạn đã cách xa lộ trình. Hãy trở lại lộ trình.'
+        },
+        high: {
+          color: '252, 110, 4',
+          message: 'Bạn đã đi rất xa lộ trình. Hãy trở lại đúng lộ trình.'
+        },
+        uncontrol: {
+          color: '255, 0, 0',
+          message: 'Bạn đã bị mất kiểm soát. Hãy trở lại đúng lộ trình.'
+        },
       };
       const THRESHOLD = {
         low: 0.00015,
@@ -174,23 +186,29 @@ session_start();
                 startDrag = true;
                 currentNode = graphicPath
                 if (deviation.length) {
+                  const {
+                    color,
+                    message
+                  } = transformLevel(deviation[value]);
                   var style = document.createElement('style');
                   style.type = 'text/css';
-                  var keyFrames = '\
-                  @keyframes warningDeviation{\
-                    from{\
-                      background-color: rgba(255,0,0,0.4);\
-                    }\
-                    to{\
-                      background-color: rgba(255,0,0,0.1);\
-                    }\
-                  }';
-                  style.innerHTML = keyFrames.replace(/A_DYNAMIC_VALUE/g, "180deg");
+                  var keyFrames = `
+                  @keyframes warningDeviation{
+                    from{
+                      background-color: rgba(${color},0.4);
+                    }
+                    to{
+                      background-color: rgba(${color},0.1);
+                    }
+                  }`;
+                  style.innerHTML = keyFrames;
                   document.getElementsByTagName('head')[0].appendChild(style);
                   const div = document.createElement('div');
                   div.className = 'flicker';
+                  if (message) {
+                    div.innerHTML = `<div style='margin-top:4rem; color:blue'>${message}</div>`
+                  }
                   document.getElementById('btn').appendChild(div);
-                  const color = transformLevel(deviation[value]);
                   console.log('COLOR', color);
                 }
               }
@@ -283,10 +301,11 @@ session_start();
           });
         });
       }
+
       function transformLevel(deviation) {
         if (deviation >= THRESHOLD.uncontrol) {
           return DEVIATION_LEVEL.uncontrol;
-        } 
+        }
         if (deviation >= THRESHOLD.high) {
           return DEVIATION_LEVEL.high;
         }
