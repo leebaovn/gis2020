@@ -84,7 +84,6 @@ function add_gps_point($point, $vehicle_id, $arc_id)
   $db->query("INSERT INTO gps_point (deviation, point_id, vehicle_id) VALUES ($deviation, $point_id, $vehicle_id)");
   header('Content-type: application/json');
   return $deviation;
-  // return $db -> error;
 }
 
 function calculate_deviation($point_id, $arc_id)

@@ -12,12 +12,8 @@ session_start();
   <link rel="stylesheet" href="./style.css">
   <?php
   $vehicle_id = "";
-  $arc_id = "";
   if (isset($_SESSION['vehicle'])) {
     $vehicle_id = $_SESSION['vehicle']['id'];
-  }
-  if (isset($_SESSION['arc_id'])) {
-    $arc_id = $_SESSION['arc_id'];
   }
   ?>
   <script defer>
@@ -80,7 +76,6 @@ session_start();
       });
 
       let vehicle_id = "<?php echo $vehicle_id; ?>";
-      let arc_id = "<?php echo $arc_id; ?>";
 
       let paths = []
       let starter = []
@@ -122,7 +117,7 @@ session_start();
                 rangeLabels: true
               },
             });
-            slider.steps = [...paths, 4].map((item, index) => index)
+            slider.steps = [...paths].map((item, index) => index)
             slider.tickConfigs = [{
               mode: "count",
               values: length + 1,
@@ -148,6 +143,7 @@ session_start();
           if (!isComplete) {
             drawPoint(event.mapPoint)
             paths.push([longitude, latitude])
+            console.log('arc id', arc_id);
             const xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
               if (this.readyState == 4 && this.status == 200) {
@@ -176,6 +172,7 @@ session_start();
         });
         view.graphics.add(graphic);
       }
+      let arc_id = '';
 
       function getRoute(start, des) {
 
@@ -197,6 +194,7 @@ session_start();
               if (this.readyState == 4 && this.status == 200) {
                 // document.getElementById("demo").innerHTML = this.responseText;
                 console.log(this.responseText);
+                arc_id = this.responseText
               }
             };
             xmlHttp.open('POST', 'db.php', true);
