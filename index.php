@@ -12,8 +12,12 @@ session_start();
   <link rel="stylesheet" href="./style.css">
   <?php
   $vehicle_id = "";
+  $color = "";
   if (isset($_SESSION['vehicle'])) {
     $vehicle_id = $_SESSION['vehicle']['id'];
+  }
+  if (isset($_SESSION['vehicle'])) {
+    $color = $_SESSION['vehicle']['color'];
   }
   ?>
   <script defer>
@@ -27,13 +31,18 @@ session_start();
       "esri/widgets/Slider",
       "esri/tasks/support/MultipartColorRamp",
     ], function(Map, MapView, RouteTask, RouteParameters, FeatureSet, Graphic, Slider, MultipartColorRamp) {
+      const DEVIATION_LEVEL = {
+        low: '#ffff01',
+        medium: '#ffb601',
+        high: '#fc6e04',
+        uncontrol: '#ff0000'
+      };
 
-
-      function drawPoint(point) {
+      function drawPoint(point, color = 'gray') {
         var graphic = new Graphic({
           symbol: {
             type: "simple-marker",
-            color: "gray",
+            color,
             size: "4px"
           },
           geometry: point
@@ -41,15 +50,14 @@ session_start();
         view.graphics.add(graphic);
       }
 
-      function drawLine(paths) {
+      function drawLine(paths, color = 'black') {
         var polyline = {
           type: "polyline",
           paths: paths
         };
-
         var polylineSymbol = {
           type: "simple-line",
-          color: 'black',
+          color,
           width: 1
         };
 
@@ -76,9 +84,14 @@ session_start();
       });
 
       let vehicle_id = "<?php echo $vehicle_id; ?>";
-
+      let color = "<?php echo $color; ?>";
+      let startDrag = false;
       let paths = []
+      let pathPoints = []
+      let deviation = []
       let starter = []
+      let currentNode = null;
+
       let isOk = false;
       let isComplete = false;
       view.on("click", function(event) {
@@ -102,7 +115,7 @@ session_start();
           btn.innerHTML = 'Hoàn tất';
           btn.addEventListener('click', function() {
             isComplete = true;
-            drawLine(paths)
+            drawLine(paths, color)
             isOk = true;
             const {
               length
@@ -110,17 +123,17 @@ session_start();
             const slider = new Slider({
               container: "sliderDiv",
               min: 0,
-              max: length,
-              values: [length],
+              max: length - 1,
+              values: [length - 1],
               visibleElements: {
                 labels: true,
                 rangeLabels: true
               },
             });
-            slider.steps = [...paths].map((item, index) => index)
+            slider.steps = [-1, ...paths].map((item, index) => index)
             slider.tickConfigs = [{
               mode: "count",
-              values: length + 1,
+              values: length,
               labelsVisible: true,
               tickCreatedFunction: function(initialValue, tickElement, labelElement) {
                 labelElement.innerHTML = 't' + labelElement["data-value"];
@@ -130,6 +143,37 @@ session_start();
                 };
               }
             }];
+            slider.on('thumb-drag', function({
+              index,
+              state,
+              type,
+              value
+            }) {
+
+              if (state === 'stop') {
+                if (startDrag) {
+                  view.graphics.remove(currentNode)
+                  const divBefore = document.getElementsByClassName('flicker');
+                  document.getElementById("btn").removeChild(divBefore[0])
+                }
+                var graphicPath = new Graphic({
+                  symbol: {
+                    type: "simple-marker",
+                    color: "blue",
+                    size: "8px"
+                  },
+                  geometry: pathPoints[value]
+                });
+                view.graphics.add(graphicPath);
+                startDrag = true;
+                currentNode = graphicPath
+                if (deviation.length) {
+                  const div = document.createElement('div');
+                  div.className = 'flicker';
+                  document.getElementById('btn').appendChild(div)
+                }
+              }
+            })
             view.ui.add(slider);
 
             btn.remove();
@@ -141,13 +185,16 @@ session_start();
         } else {
           //Bắt đầu cho ghi nhận lộ trình di chuyển của user
           if (!isComplete) {
+            console.log(event.mapPoint, 'map point')
             drawPoint(event.mapPoint)
             paths.push([longitude, latitude])
+            pathPoints.push(event.mapPoint)
             console.log('arc id', arc_id);
             const xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
               if (this.readyState == 4 && this.status == 200) {
                 console.log(this.responseText);
+                deviation.push(responseText);
               }
             };
             xmlHttp.open('POST', 'db.php', true);
