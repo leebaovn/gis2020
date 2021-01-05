@@ -168,6 +168,19 @@ session_start();
                 startDrag = true;
                 currentNode = graphicPath
                 if (deviation.length) {
+                  var style = document.createElement('style');
+                  style.type = 'text/css';
+                  var keyFrames = '\
+                  @keyframes warningDeviation{\
+                    from{\
+                      background-color: rgba(255,0,0,0.4);\
+                    }\
+                    to{\
+                      background-color: rgba(255,0,0,0.1);\
+                    }\
+                  }';
+                  style.innerHTML = keyFrames.replace(/A_DYNAMIC_VALUE/g, "180deg");
+                  document.getElementsByTagName('head')[0].appendChild(style);
                   const div = document.createElement('div');
                   div.className = 'flicker';
                   document.getElementById('btn').appendChild(div)
@@ -194,7 +207,7 @@ session_start();
             xmlHttp.onreadystatechange = function() {
               if (this.readyState == 4 && this.status == 200) {
                 console.log(this.responseText);
-                deviation.push(responseText);
+                deviation.push(this.responseText);
               }
             };
             xmlHttp.open('POST', 'db.php', true);
