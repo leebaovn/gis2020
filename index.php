@@ -130,7 +130,7 @@ session_start();
         } else if (view.graphics.length === 1) {
           addPoint("finish", event.mapPoint);
           document.getElementById("destination").value = `${longitude},${latitude}`;
-          document.getElementById("status").innerHTML = 'Hãy chọn lộ trình di chuyển của bạn';
+          document.getElementById("status").innerHTML = '3. Hãy chọn lộ trình di chuyển của bạn';
 
           let btn = document.createElement("button");
           btn.className = 'btnELe';
@@ -214,7 +214,7 @@ session_start();
                   const div = document.createElement('div');
                   div.className = 'flicker';
                   if (message) {
-                    div.innerHTML = `<div style='margin-top:4rem; color:blue'>${message}</div>`
+                    div.innerHTML = `<div class='warning-message'>${message}</div>`
                   }
                   document.getElementById('btn').appendChild(div);
                   console.log('COLOR', color);
@@ -332,7 +332,7 @@ session_start();
 </head>
 
 <body>
-  <div class="status" id="status">Chọn điểm đi và điểm đến</div>
+  <div class="status" id="status">1. Nhập thông tin phương tiện</div>
   <div class='modal' id='modal'>
     <div class="overlay"></div>
     <div class="vehicle-form" id='vehicle-form'>
@@ -378,6 +378,7 @@ session_start();
     <div id="viewDiv"></div>
     <div id="sliderDiv" class="footer"></div>
     <div class="color-ramps"></div>
+    <div class="color-ramps-explain"><span>Độ lệch thấp</span><span>Độ lệch cao</span></div>
   </div>
 </body>
 
@@ -386,7 +387,7 @@ session_start();
 if (isset($_SESSION['vehicle'])) {
   echo '<script type="text/javascript">
     document.getElementById("modal").style.display="none";
-    
+    document.getElementById("status").innerHTML="2. Chọn điểm đi và điểm đến";
     </script>';
 }
 ?>
