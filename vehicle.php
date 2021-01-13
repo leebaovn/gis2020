@@ -28,5 +28,3 @@
   $_SESSION['vehicle']['id'] = $db->insert_id;  
   echo header("refresh: 0; url = index.php");
   return json_encode($result);
-?>
-<!-- //window.localStorage.setItem('color',$color) -->
